@@ -3,8 +3,8 @@ Homepage: http://matthewruddy.com/display-tweets-plugin/
 Contributors: MatthewRuddy
 Tags: twitter, tweets, feed, retweets, mentions, favourites, display
 Requires at least: 3.5
-Tested up to: 3.5.1
-Stable tag: 1.0
+Tested up to: 3.6
+Stable tag: 1.0.1
 
 Display Tweets is an easy to use, future proof Twitter feed plugin that uses PHP to make requests to the v1.1 Twitter REST API.
 
@@ -32,3 +32,9 @@ You can also display your tweets using the included widget.
 
 1. The Twitter feed settings panel.
 2. A snapshot of tweets displaying.
+
+== Changelog ==
+
+= v1.0.1 =
+- Added class exists check before loading TwitterOAuth.
+- Correct tweet refresh interval.

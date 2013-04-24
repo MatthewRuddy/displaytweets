@@ -3,7 +3,7 @@
 /*
     Plugin Name: Display Tweets
     Plugin URI: http://matthewruddy.com/display-tweets-plugin
-    Version: 1.0
+    Version: 1.0.1
     Author: Matthew Ruddy
     Author URI: http://matthewruddy.com/
     Description: A rather simple Twitter feed plugin that uses the v1.1 Twitter API.
@@ -50,14 +50,14 @@ class DisplayTweets {
      *
      * @since 1.0
      */
-    public static $version = '1.0';
+    public static $version = '1.0.1';
 
     /**
      * How often the tweets are refreshed (in milliseconds). Defualt is five minutes.
      *
      * @since 1.0
      */
-    public static $refresh = 300000;
+    public static $refresh = 18000;
 
     /**
      * URL for registering a Twitter application
@@ -498,7 +498,8 @@ class DisplayTweets {
         if ( $tweets === false ) {
 
             /** Require the twitter auth class */
-            require_once 'includes/Twitter/twitteroauth/twitteroauth.php';
+            if ( !class_exists('TwitterOAuth') )
+                require_once 'includes/Twitter/twitteroauth/twitteroauth.php';
 
             /** Get Twitter connection */
             $twitterConnection = new TwitterOAuth(
