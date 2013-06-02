@@ -3,7 +3,7 @@
 /*
     Plugin Name: Display Tweets
     Plugin URI: http://matthewruddy.com/display-tweets-plugin
-    Version: 1.0.1
+    Version: 1.0.2
     Author: Matthew Ruddy
     Author URI: http://matthewruddy.com/
     Description: A rather simple Twitter feed plugin that uses the v1.1 Twitter API.
@@ -50,7 +50,7 @@ class DisplayTweets {
      *
      * @since 1.0
      */
-    public static $version = '1.0.1';
+    public static $version = '1.0.2';
 
     /**
      * How often the tweets are refreshed (in milliseconds). Defualt is five minutes.
@@ -252,6 +252,33 @@ class DisplayTweets {
             return false;
         }
         return true;
+    }
+    
+    /**
+     * Returns the ids of the various multisite blogs. Returns false if not a multisite installation.
+     *
+     * @since 1.0.2
+     */
+    public function get_multisite_blogs() {
+
+        global $wpdb;
+
+        /** Bail if not multisite */
+        if ( !is_multisite() )
+            return false;
+
+        /** Get the blogs ids from database */
+        $query = "SELECT blog_id from $wpdb->blogs";
+        $blogs = $wpdb->get_col($query);
+
+        /** Push blog ids to array */
+        $blog_ids = array();
+        foreach ( $blogs as $blog )
+            $blog_ids[] = $blog;
+
+        /** Return the multisite blog ids */
+        return $blog_ids;
+
     }
 
     /**
