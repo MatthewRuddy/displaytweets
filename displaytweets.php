@@ -3,7 +3,7 @@
 /*
     Plugin Name: Display Tweets
     Plugin URI: http://matthewruddy.com/display-tweets-plugin
-    Version: 1.0.2
+    Version: 1.0.3
     Author: Matthew Ruddy
     Author URI: http://matthewruddy.com/
     Description: A rather simple Twitter feed plugin that uses the v1.1 Twitter API.
@@ -50,14 +50,14 @@ class DisplayTweets {
      *
      * @since 1.0
      */
-    public static $version = '1.0.2';
+    public static $version = '1.0.3';
 
     /**
-     * How often the tweets are refreshed (in milliseconds). Defualt is five minutes.
+     * How often the tweets are refreshed (in seconds). Defualt is five minutes.
      *
      * @since 1.0
      */
-    public static $refresh = 18000;
+    public static $refresh = 300;
 
     /**
      * URL for registering a Twitter application
@@ -86,6 +86,9 @@ class DisplayTweets {
      */
     private function __construct() {
 
+        /** Get the plugin name */
+        $plugin = plugin_basename( __FILE__ );
+
         /** Load plugin textdomain for language capabilities */
         load_plugin_textdomain( 'displaytweets', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
 
@@ -102,6 +105,7 @@ class DisplayTweets {
         /** Hooks actions & shortcodes */
         add_action( 'admin_menu', array( $this, 'add_settings_page' ) );
         add_action( 'admin_menu', array( $this, 'save_settings' ) );
+        add_filter( "plugin_action_links_{$plugin}", array( $this, 'add_settings_link' ) );
         add_shortcode( 'display_tweets', array( $this, 'do_shortcode' ) );
 
         /** Custom actions hook */
@@ -214,7 +218,7 @@ class DisplayTweets {
             'screen_name' => 'matthewruddycom',
             'count' => 5,
             'include_rts' => true,
-            'exclude_replies' => true
+            'exclude_replies' => false
         ) );
 
         /** Trigger hooks */
@@ -294,6 +298,16 @@ class DisplayTweets {
             'displaytweets',
             array( $this, 'settings_view' )
         );
+    }
+
+    /**
+     * Adds a settings link to the "Plugins" panel
+     *
+     * @since 1.0.3
+     */
+    public function add_settings_link($links) {
+        array_unshift($links, '<a href="options-general.php?page=displaytweets">Settings</a>');
+        return $links; 
     }
 
     /**
@@ -583,8 +597,16 @@ class DisplayTweets {
 
             else :
 
+                /** Set the date and time format */
+                $datetime_format = apply_filters( 'displaytweets_datetime_format', "l M j \- g:ia" );
+
                 /** Get the date and time posted as a nice string */
-                $posted_since = apply_filters( 'displaytweets_posted_since', date( "l M j \- g:ia" , strtotime( $tweet->created_at ) ) );
+                $posted_since = apply_filters( 'displaytweets_posted_since', date_i18n( $datetime_format , strtotime( $tweet->created_at ) ) );
+
+                /** Filter for linking dates to the tweet itself */
+                $link_date = apply_filters( 'displaytweets_link_date_to_tweet', __return_false() );
+                if ( $link_date )
+                    $posted_since = "<a href=\"https://twitter.com/{$tweet->user->screen_name}/status/{$tweet->id_str}\">{$posted_since}</a>";
 
                 /** Print tweet */
                 echo "<p>{$this->format_tweet( $tweet->text )}<br /><small class=\"muted\">- {$posted_since}</small></p>";
