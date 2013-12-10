@@ -294,7 +294,7 @@ class DisplayTweets {
         add_options_page(
             __( 'Twitter Feed Settings', 'displaytweets' ),
             __( 'Twitter Feed', 'displaytweets' ),
-            'edit_plugins',
+            'activate_plugins',
             'displaytweets',
             array( $this, 'settings_view' )
         );
@@ -582,7 +582,7 @@ class DisplayTweets {
 
         /** Bail if there are no tweets */
         if ( !$tweets ) {
-            if ( current_user_can( 'edit_plugins' ) )
+            if ( current_user_can( 'activate_plugins' ) )
                 echo '<p style="color: red;">'. __( 'No tweets found. Please make sure your settings are correct.', 'displaytweets' ) .'</p>';
             return;
         }
