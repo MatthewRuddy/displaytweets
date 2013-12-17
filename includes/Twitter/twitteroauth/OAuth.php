@@ -5,6 +5,9 @@
  */
 class OAuthException extends Exception {
   // pass
+  public function __construct() { 
+    parent::__construct(); 
+  }
 }
 
 class OAuthConsumer {
