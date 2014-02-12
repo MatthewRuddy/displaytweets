@@ -72,13 +72,13 @@ class DisplayTweets {
      * @since 1.0
      */
     public static function get_instance() {
-    
+
         if ( !self::$instance instanceof self )
             self::$instance = new self;
         return self::$instance;
-    
+
     }
-    
+
     /**
      * Constructor
      *
@@ -112,7 +112,7 @@ class DisplayTweets {
         do_action_ref_array( 'displaytweets', array( $this ) );
 
     }
-    
+
     /**
      * Executes a network activation
      *
@@ -121,7 +121,7 @@ class DisplayTweets {
     public static function do_network_activation() {
         self::get_instance()->network_activate();
     }
-    
+
     /**
      * Executes a network uninstall
      *
@@ -130,7 +130,7 @@ class DisplayTweets {
     public static function do_network_uninstall() {
         self::get_instance()->network_uninstall();
     }
-    
+
     /**
      * Executes an activation
      *
@@ -139,7 +139,7 @@ class DisplayTweets {
     public static function do_activation() {
         self::get_instance()->activate();
     }
-    
+
     /**
      * Executes an uninstall
      *
@@ -148,7 +148,7 @@ class DisplayTweets {
     public static function do_uninstall() {
         self::get_instance()->uninstall();
     }
-    
+
     /**
      * Network activation hook
      *
@@ -174,7 +174,7 @@ class DisplayTweets {
         do_action_ref_array( 'displaytweets_network_activate', array( $this ) );
 
     }
-    
+
     /**
      * Network uninstall hook
      *
@@ -196,7 +196,7 @@ class DisplayTweets {
         do_action_ref_array( 'displaytweets_network_uninstall', array( $this ) );
 
     }
-    
+
     /**
      * Activation hook
      *
@@ -220,12 +220,13 @@ class DisplayTweets {
             'include_rts' => true,
             'exclude_replies' => false
         ) );
+        add_option( 'displaytweets_twitter_handles', array( 'matthewruddycom' ) );
 
         /** Trigger hooks */
         do_action_ref_array( 'displaytweets_activate', array( $this ) );
 
     }
-    
+
     /**
      * Uninstall Hook
      *
@@ -236,13 +237,14 @@ class DisplayTweets {
         /** Delete options and transients */
         delete_option( 'displaytweets_version' );
         delete_option( 'displaytweets_settings' );
-        delete_transient( 'displaytweets_tweets' );
+        delete_option( 'displaytweets_twitter_handles' );
+        $this->delete_all_transients();
 
         /** Trigger hooks */
         do_action_ref_array( 'displaytweets_uninstall', array( $this ) );
 
     }
-    
+
     /**
      *  Does a plugin version check, making sure the current Wordpress version is supported. If not, the plugin is deactivated and an error message is displayed.
      *
@@ -257,7 +259,7 @@ class DisplayTweets {
         }
         return true;
     }
-    
+
     /**
      * Returns the ids of the various multisite blogs. Returns false if not a multisite installation.
      *
@@ -307,7 +309,7 @@ class DisplayTweets {
      */
     public function add_settings_link($links) {
         array_unshift($links, '<a href="options-general.php?page=displaytweets">Settings</a>');
-        return $links; 
+        return $links;
     }
 
     /**
@@ -347,14 +349,48 @@ class DisplayTweets {
         /** Save the settings */
         update_option( 'displaytweets_settings', stripslashes_deep( $this->validate_settings( $_POST['settings'] ) ) );
 
-        /** Delete the old transient to force a refresh */
-        delete_transient( 'displaytweets_tweets' );
+        /** Store the Twitter handle so we can clean it up later if necessary */
+        $this->store_twitter_handle( $_POST['settings']['screen_name'] );
+
+        /** Delete the old transient(s) to force a refresh */
+        $this->delete_all_transients();
 
         /** Display success message */
         add_action( 'admin_notices', create_function( '', 'echo "<div class=\"message updated\"><p>'. __( 'Settings have been saved successfully.', 'displaytweets' ) .'</p></div>";' ) );
 
     }
-    
+
+    /**
+     * Add a Twitter handle to the displaytweets_twitter_handles option array
+     *
+     * @param str $handle
+     */
+    public function store_twitter_handle( $handle ) {
+        $handles = get_option( 'displaytweets_twitter_handles' );
+        if ( is_array( $handles ) ) {
+            if ( ! in_array( $handle, $handles ) ) {
+                $handles[] = $handle;
+                update_option( 'displaytweets_twitter_handles', $handles );
+            }
+
+        } else {
+            update_option( 'displaytweets_twitter_handles', array( $handle ) );
+        }
+    }
+
+    /**
+     * Delete all transients saved by the plugin
+     */
+    public function delete_all_transients() {
+        $usernames = get_option( 'displaytweets_twitter_handles' );
+        if ( is_array( $usernames ) ) {
+            foreach ( $usernames as $username ) {
+                delete_transient( $this->get_transient_name( $username ) );
+            }
+        }
+        delete_transient( 'displaytweets_tweets' );
+    }
+
     /**
      * Executes a shortcode handler
      *
@@ -457,7 +493,7 @@ class DisplayTweets {
                                 <td>
                                     <fieldset>
                                         <legend class="screen-reader-text"><span><?php _e( 'Include Retweets', 'displaytweets' ); ?></span></legend>
-                                        
+
                                         <label for="include_rts_true"><input type="radio" name="settings[include_rts]" id="include_rts_true" value="true" <?php checked( $s['include_rts'], true ); ?>>
                                             <span><?php _e( 'Yes', 'displaytweets' ); ?></span>
                                         </label>
@@ -476,12 +512,12 @@ class DisplayTweets {
                                 <td>
                                     <fieldset>
                                         <legend class="screen-reader-text"><span><?php _e( 'Exclude Replies', 'displaytweets' ); ?></span></legend>
-                                        
+
                                         <label for="exclude_replies_true"><input type="radio" name="settings[exclude_replies]" id="exclude_replies_true" value="true" <?php checked( $s['exclude_replies'], true ); ?>>
                                             <span><?php _e( 'Yes', 'displaytweets' ); ?><span>
                                         </label>
                                         <br />
-                                        
+
                                         <label for="exclude_replies_false"><input type="radio" name="settings[exclude_replies]" id="exclude_replies_false" value="false" <?php checked( $s['exclude_replies'], false ); ?>>
                                             <span><?php _e( 'No', 'displaytweets' ); ?><span>
                                         </label>
@@ -535,7 +571,8 @@ class DisplayTweets {
         ) );
 
         /** Get tweets from transient. False if it has expired */
-        $tweets = get_transient( "displaytweets_tweets" );
+        $transient_name = $this->get_transient_name( $args['screen_name'] );
+        $tweets = get_transient( $transient_name );
         if ( $tweets === false ) {
 
             /** Require the twitter auth class */
@@ -561,13 +598,24 @@ class DisplayTweets {
                 return false;
 
             /** Set tweets */
-            set_transient( "displaytweets_tweets", $tweets, apply_filters( 'displaytweets_refresh_timeout', self::$refresh ) );
+            set_transient( $transient_name, $tweets, apply_filters( 'displaytweets_refresh_timeout', self::$refresh ) );
+            $this->store_twitter_handle( $args['screen_name'] );
 
         }
 
         /** Return tweets */
         return $tweets;
 
+    }
+
+    /**
+     * Generate the transient name, based on the user's Twitter handle
+     *
+     * @param str $handle The user's Twitter handle
+     * @return str
+     */
+    public function get_transient_name( $handle ) {
+        return ( $handle ? sprintf( 'displaytweets_tweets_%s', $handle ) : 'displaytweets_tweets' );
     }
 
     /**
@@ -657,7 +705,7 @@ class DT_Widget extends WP_Widget {
         echo $before_widget;
         if ( !empty( $title ) )
             echo $before_title . $title . $after_title;
-        
+
         /** Display tweets */
         if ( function_exists( 'display_tweets' ) )
             display_tweets();
