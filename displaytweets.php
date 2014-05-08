@@ -53,7 +53,7 @@ class DisplayTweets {
     public static $version = '1.0.3';
 
     /**
-     * How often the tweets are refreshed (in seconds). Defualt is five minutes.
+     * How often the tweets are refreshed (in seconds). Default is five minutes.
      *
      * @since 1.0
      */
