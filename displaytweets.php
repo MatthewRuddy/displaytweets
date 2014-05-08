@@ -53,7 +53,7 @@ class DisplayTweets {
     public static $version = '1.0.3';
 
     /**
-     * How often the tweets are refreshed (in seconds). Defualt is five minutes.
+     * How often the tweets are refreshed (in seconds). Default is five minutes.
      *
      * @since 1.0
      */
@@ -294,7 +294,7 @@ class DisplayTweets {
         add_options_page(
             __( 'Twitter Feed Settings', 'displaytweets' ),
             __( 'Twitter Feed', 'displaytweets' ),
-            'edit_plugins',
+            'manage_options',
             'displaytweets',
             array( $this, 'settings_view' )
         );
