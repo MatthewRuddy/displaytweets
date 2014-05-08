@@ -294,7 +294,7 @@ class DisplayTweets {
         add_options_page(
             __( 'Twitter Feed Settings', 'displaytweets' ),
             __( 'Twitter Feed', 'displaytweets' ),
-            'edit_plugins',
+            'activate_plugins',
             'displaytweets',
             array( $this, 'settings_view' )
         );
