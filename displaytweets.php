@@ -601,7 +601,7 @@ class DisplayTweets {
                 $datetime_format = apply_filters( 'displaytweets_datetime_format', "l M j \- g:ia" );
 
                 /** Get the date and time posted as a nice string */
-                $posted_since = apply_filters( 'displaytweets_posted_since', date_i18n( $datetime_format , strtotime( $tweet->created_at ) ) );
+                $posted_since = apply_filters( 'displaytweets_posted_since', date_i18n( $datetime_format , strtotime( $tweet->created_at ) + ( get_option('gmt_offset') * 3600 ) ) );
 
                 /** Filter for linking dates to the tweet itself */
                 $link_date = apply_filters( 'displaytweets_link_date_to_tweet', __return_false() );
