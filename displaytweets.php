@@ -535,7 +535,7 @@ class DisplayTweets {
         ) );
 
         /** Get tweets from transient. False if it has expired */
-        $tweets = get_transient( "displaytweets_tweets" );
+        $tweets = unserialize(base64_decode( get_transient( "displaytweets_tweets" )));
         if ( $tweets === false ) {
 
             /** Require the twitter auth class */
@@ -561,8 +561,7 @@ class DisplayTweets {
                 return false;
 
             /** Set tweets */
-            set_transient( "displaytweets_tweets", $tweets, apply_filters( 'displaytweets_refresh_timeout', self::$refresh ) );
-
+            set_transient( "displaytweets_tweets", base64_encode(serialize($tweets)), apply_filters( 'displaytweets_refresh_timeout', self::$refresh ) );
         }
 
         /** Return tweets */
