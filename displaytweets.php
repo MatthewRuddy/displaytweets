@@ -3,7 +3,7 @@
 /*
     Plugin Name: Display Tweets
     Plugin URI: http://matthewruddy.com/display-tweets-plugin
-    Version: 1.0.3
+    Version: 1.0.4
     Author: Matthew Ruddy
     Author URI: http://matthewruddy.com/
     Description: A rather simple Twitter feed plugin that uses the v1.1 Twitter API.
